@@ -54,7 +54,7 @@ def integrate_mc(
         )
 
     else:
-        mean, rmse = monte_carlo(p=cp.Uniform(0.0, 1.0),
+        mean, rmse = monte_carlo(p=cp.Uniform(a, b),
             n_samples=n_samples, f=f, seed=seed
         )
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     a = 0.0
     b = 1.0
     with_transform = False
-    plot_fname = "assignment_2_1_direct_0_1.png"
+    plot_fname = "plots/assignment_2_1_direct_0_1.png"
 
     # ====================================================================
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
 
     print(sim_label)
-    estimates, errors, rmses = run_mc_for_sample_sizes(0.0, 1.0, sample_sizes, False)
+    estimates, errors, rmses = run_mc_for_sample_sizes(a, b, sample_sizes, with_transform)
 
     # ====================================================================
 
@@ -136,5 +136,11 @@ if __name__ == "__main__":
 
 
     plot_mc_result(sim_label, sample_sizes, errors, rmses, plot_fname)
+
+
+    # estimates, errors, rmses = run_mc_for_sample_sizes(2.0, 4.0, sample_sizes, False)
+    # plot_mc_result("Assignment 2.2: direct sampling on [2, 4]", sample_sizes, errors, rmses, "plots/assignment_2_2_direct_2_4.png")
+    # estimates, errors, rmses = run_mc_for_sample_sizes(2.0, 4.0, sample_sizes, True)
+    # plot_mc_result("Assignment 2.2: transformed sampling on [2, 4]", sample_sizes, errors, rmses, "plots/assignment_2_2_transformed_2_4.png")
     # ====================================================================
     
