@@ -130,6 +130,7 @@ if __name__ == "__main__":
         plt.grid(True, which="both")
         plt.legend()
 
+        plt.ylim(0.001, 0.5)
         plt.tight_layout()
         plt.savefig(filename, bbox_inches="tight")
         plt.show()
