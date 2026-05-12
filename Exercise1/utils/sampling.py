@@ -35,8 +35,7 @@ def monte_carlo(
     if transform is not None:
         samples = transform(samples)
 
-    values = np.asarray(f(samples), dtype=float)
-    values = np.atleast_2d(values)
+    values = np.atleast_2d(np.asarray(f(samples), dtype=float))
 
     mean = np.mean(values, axis=1)
     rmse = compute_rmse(values)
@@ -62,20 +61,15 @@ def control_variates(
         include_axis_dim=True,
     )
 
-    values = np.asarray(f(samples), dtype=float)
-    controls = np.asarray(phi(samples), dtype=float)
-
-    values = np.atleast_2d(values)
-    controls = np.atleast_2d(controls)
+    # handling for 1 dim case
+    values = np.atleast_2d(np.asarray(f(samples), dtype=float))
+    controls = np.atleast_2d(np.asarray(phi(samples), dtype=float))
 
     value_mean = np.mean(values, axis=1)
     control_sample_mean = np.mean(controls, axis=1)
 
-    centered_values = values - value_mean[:, np.newaxis]
-    centered_controls = controls - control_sample_mean[:, np.newaxis]
-
-    covariance = np.mean(centered_values * centered_controls, axis=1)
-    control_variance = np.mean(centered_controls**2, axis=1)
+    covariance = np.cov(values, controls, ddof=1)[0, 1]
+    control_variance = np.var(controls, ddof=1)
 
     beta = covariance / control_variance
 
@@ -101,20 +95,13 @@ def importance_sampling(
         include_axis_dim=True,
     )
 
-    values = np.asarray(f(samples), dtype=float)
-    values = np.atleast_2d(values)
+    values = np.atleast_2d(np.asarray(f(samples), dtype=float))
 
-    # Importance weights p(x) / q(x).
-    weights = np.asarray(
-        p.pdf(samples) / q.pdf(samples),
-        dtype=float,
-    )
+    # p(x) / q(x) weights
+    weights = np.asarray(p.pdf(samples) / q.pdf(samples), dtype=float)
+    # weights = np.squeeze(weights)
 
-    weights = np.squeeze(weights)
-
-    mean = np.mean(
-        values * weights[np.newaxis, :],
-        axis=1,
-    )
+    mean = np.mean(values * weights, axis=1)
+    
     # ====================================================================
     return mean

@@ -137,3 +137,4 @@ if __name__ == "__main__":
 
     plot_mc_result(sim_label, sample_sizes, errors, rmses, plot_fname)
     # ====================================================================
+    
