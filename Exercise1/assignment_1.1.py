@@ -3,22 +3,25 @@ import numpy.typing as npt
 
 
 def load_grades(filename: str) -> npt.NDArray:
-    # reads grades from the file.
+    # TODO: read grades from the file.
     # ====================================================================
-    ls = []
-    with open(filename, 'r') as file:
-        for line in file:
-            ls.append(float(line))
+
+    grades = np.loadtxt(filename, dtype=float)
     
-    grades = np.array(ls, dtype=float)
     # ====================================================================
     return grades
 
 
 def python_compute(array: npt.NDArray) -> tuple[float, float]:
-    # computes the mean and the variance using standard Python.
+    # TODO: compute the mean and the variance using standard Python.
     # ====================================================================
-    mean, var = sum(array)/len(array), sum((array - (sum(array)/len(array)))**2)/len(array) 
+    n_samples = len(array)
+
+    mean = sum(array) / n_samples
+
+    # The worksheet defines the unbiased sample variance estimator,
+    # which divides by N - 1 instead of N.
+    var = sum((value - mean) ** 2 for value in array) / (n_samples - 1)
     # ====================================================================
     return mean, var
 
@@ -26,25 +29,33 @@ def python_compute(array: npt.NDArray) -> tuple[float, float]:
 def numpy_compute(array: npt.NDArray, ddof: int = 0) -> tuple[float, float]:
     # TODO: compute the mean and the variance using numpy.
     # ====================================================================
-    mean, var = np.mean(array), np.var(array, ddof=ddof)
+    mean = np.mean(array)
+    var = np.var(array, ddof=ddof)
     # ====================================================================
     return mean, var
 
-# assumes G.txt is in /data folder of the currrent directory
+
 if __name__ == "__main__":
-    # load the grades from the file, compute the mean and the
+    # TODO: load the grades from the file, compute the mean and the
     # variance using both implementations and report the results.
     # ====================================================================
-    arr = load_grades("data/G.txt")
-    py_m, py_v = python_compute(arr)
-    np_m, np_v = numpy_compute(arr)
+    grades = load_grades("data/G.txt")
 
-    print(
-        f"Python-only yields: \n"
-        f"\tMean: {py_m} \tVariance: {py_v} \n"
-        f"Numpy gives:\n"
-        f"\tMean: {np_m} \tVariance: {np_v} \n"
-        f"Difference is:\n"
-        f"\tΔMean: {abs(py_m-np_m)} \tΔVariance: {abs(py_v-np_v)}"
-    )
+    python_mean, python_var = python_compute(grades)
+
+    numpy_mean_biased, numpy_var_biased = numpy_compute(grades)
+    numpy_mean_unbiased, numpy_var_unbiased = numpy_compute(grades, ddof=1)
+
+    print("Python implementation")
+    print(f"Mean:     {python_mean:.6f}")
+    print(f"Variance: {python_var:.6f}")
+
+    print("\nNumPy implementation with ddof=0")
+    print(f"Mean:     {numpy_mean_biased:.6f}")
+    print(f"Variance: {numpy_var_biased:.6f}")
+
+    print("\nNumPy implementation with ddof=1")
+    print(f"Mean:     {numpy_mean_unbiased:.6f}")
+    print(f"Variance: {numpy_var_unbiased:.6f}")
+
     # ====================================================================

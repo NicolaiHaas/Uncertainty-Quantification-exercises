@@ -16,7 +16,7 @@ def f(x: npt.NDArray) -> npt.NDArray:
 def analytical_integral() -> float:
     # TODO: compute the analytical integral of f on [0, 1].
     # ====================================================================
-    return np.e-1
+    return np.e - 1.0
     # ====================================================================
 
 
@@ -24,44 +24,48 @@ def run_monte_carlo(Ns: tuple[int, ...], seed: int = 42) -> list[float]:
     # TODO: run the Monte Carlo method and return the absolute error
     # of the estimation.
     # ====================================================================
-    np.random.seed(seed=seed)
+    distribution = cp.Uniform(0.0, 1.0)
+    exact_value = analytical_integral()
+
     errors = []
-    for n in Ns:
-        samples = np.random.random(size=n)
-        errors.append(
-                np.abs(np.mean(f(samples)) - analytical_integral())
-            )
+
+    for n_samples in Ns:
+        estimate, _ = monte_carlo(p=distribution, n_samples=n_samples,
+            f=f, seed=seed)
+
+        errors.append(abs(estimate[0] - exact_value))
+
     return errors
     # ====================================================================
 
 
-def run_control_variates(
-    Ns: tuple[int, ...], seed: int = 42
-):
+def run_control_variates(Ns: tuple[int, ...], seed: int = 42):
     # TODO: run the control variate method for and return the absolute
     # errors of the resulting estimations.
     # ====================================================================
-    h_1 = lambda x: x
-    h_2 = lambda x: 1 + x
-    h_3 = lambda x: 1 + x + x**2/2
-    # expected values and variances under the transformations
-    E_h = [0.5,1.5,5/3]
-    V_h = [1/12,1/12,17/90]
-    #list of transformations
-    H = [h_1,h_2,h_3]
+    distribution = cp.Uniform(0.0, 1.0)
+    exact_value = analytical_integral()
 
-    np.random.seed(seed=seed)
-    errors = [[] for _ in range(len(H))]
-    for n in Ns:
-        samples = np.random.random(n)
-        f_samples = f(samples)
-        for j in range(len(H)):
-            h_samples = H[j](samples)
-            a = np.cov(f_samples,h_samples)[0,1]/V_h[j]
-            errors[j].append(
-                    np.abs(np.mean(f(samples)) + a*(E_h[j]-np.mean(h_samples)) - analytical_integral())
-                )
-    return tuple(errors)
+    controls = [
+        (lambda x: x, 0.5),
+        (lambda x: 1.0 + x, 1.5),
+        (lambda x: 1.0 + x + 0.5 * x**2, 1.0 + 0.5 + 1.0 / 6.0),
+    ]
+
+    all_errors = []
+
+    for phi, control_mean in controls:
+        errors = []
+
+        for n_samples in Ns:
+            estimate = control_variates(p=distribution, n_samples=n_samples,
+                f=f, phi=phi, control_mean=control_mean, seed=seed)
+
+            errors.append(abs(estimate[0] - exact_value))
+
+        all_errors.append(errors)
+
+    return tuple(all_errors)
     # ====================================================================
 
 
@@ -71,48 +75,93 @@ def run_importance_sampling(
     # TODO: run the importance sampling method and return the absolute
     # errors of the resulting estimations.
     # ====================================================================
-    q_1 = cp.Beta(5,1,0,1).pdf
-    q_2 = cp.Beta(0.5,0.5,0,1).pdf
-    Q = [q_1,q_2]
-    np.random.seed(seed=seed)
-    errors = [[] for _ in range(len(Q))]
-    for n in Ns:
-        x = np.random.rand(n)
-        for j in range(len(Q)):
-            # p is uniform on [0,1] => w = 1/q
-            errors[j].append(
-                np.abs(np.mean(f(x)/Q[j](x)) - analytical_integral())
+    target_distribution = cp.Uniform(0.0, 1.0)
+    proposal_distributions = [
+        cp.Beta(5.0, 1.0),
+        cp.Beta(0.5, 0.5),
+    ]
+
+    exact_value = analytical_integral()
+    all_errors = []
+
+    for proposal_distribution in proposal_distributions:
+        errors = []
+
+        for n_samples in Ns:
+            estimate = importance_sampling(p=target_distribution,
+                q=proposal_distribution, n_samples=n_samples,
+                f=f, seed=seed
             )
-        
-    return tuple(errors)
+
+            errors.append(abs(estimate[0] - exact_value))
+
+        all_errors.append(errors)
+
+    return tuple(all_errors)
     # ====================================================================
 
 
 if __name__ == "__main__":
     # TODO: define the parameters of the simulation.
     # ====================================================================
-    N = (10,100,1000,10000)
+    sample_sizes = (10, 100, 1000, 10000)
     # ====================================================================
 
     # TODO: run all the methods.
     # ====================================================================
-    MC_errors = run_monte_carlo(N)
-    CV_errors = run_control_variates(N)
-    IS_errors = run_importance_sampling(N)
+    mc_errors = run_monte_carlo(sample_sizes)
+
+    cv_h1_errors, cv_h2_errors, cv_h3_errors = run_control_variates(sample_sizes)
+
+    is_beta_5_1_errors, is_beta_half_half_errors = run_importance_sampling(sample_sizes)
+
+    # trying print as table
+    print("Absolute errors\n")
+    print(f"{'N':>8} | {'MC':>12} | {'CV h1':>12} | {'CV h2':>12} | "
+          f"{'CV h3':>12} | {'IS β(5,1)':>12} | {'IS β(.5,.5)':>14}")
+
+    for i, n_samples in enumerate(sample_sizes):
+        print(
+            f"{n_samples:8d} | "
+            f"{mc_errors[i]:12.6e} | "
+            f"{cv_h1_errors[i]:12.6e} | "
+            f"{cv_h2_errors[i]:12.6e} | "
+            f"{cv_h3_errors[i]:12.6e} | "
+            f"{is_beta_5_1_errors[i]:12.6e} | "
+            f"{is_beta_half_half_errors[i]:14.6e}"
+        )
     # ====================================================================
 
     # TODO: plot the results on the log-log scale.
     # ====================================================================
-    MC = plt.plot(N,MC_errors, c = 'red', ls = '--')[0]
-    CV_0 = plt.plot(N,CV_errors[0])[0]
-    CV_1 = plt.plot(N,CV_errors[1])[0]
-    CV_2 = plt.plot(N,CV_errors[2])[0]
-    IS_0 = plt.plot(N,IS_errors[0])[0]
-    IS_1 = plt.plot(N,IS_errors[1])[0]
-    
-    plt.yscale('log')
-    plt.xscale('log')
+    plt.figure(figsize=(8, 5))
 
-    plt.legend([MC,CV_0,CV_1,CV_2,IS_0,IS_1],["MC","CV x","CV x+1","CV x^2+x+1","IS a=5,b=1","IS a=b=0.5"])
+    plt.plot(sample_sizes, mc_errors, marker="o", label="Standard MC")
+    plt.plot(sample_sizes, cv_h1_errors, marker="o", label="Control variate h1")
+    plt.plot(sample_sizes, cv_h2_errors, marker="o", label="Control variate h2")
+    plt.plot(sample_sizes, cv_h3_errors, marker="o", label="Control variate h3")
+    plt.plot(sample_sizes, is_beta_5_1_errors, marker="o", label="IS Beta(5, 1)")
+    plt.plot(sample_sizes, is_beta_half_half_errors, marker="o", label="IS Beta(0.5, 0.5)")
+
+    # Reference Monte Carlo convergence rate O(N^{-1/2}).
+    plt.plot(
+        sample_sizes,
+        1 / np.sqrt(np.array(sample_sizes)),
+        linestyle=":",
+        color="black",
+        label=r"$\mathcal{O}(N^{-1/2})$",
+    )
+
+    plt.xscale("log")
+    plt.yscale("log")
+
+    plt.xlabel("Number of samples N")
+    plt.ylabel("Absolute error")
+    plt.title("Assignment 3: Monte Carlo variance reduction")
+    plt.grid(True, which="both")
+    plt.legend()
+
+    plt.tight_layout()
+    plt.savefig("plots/assignment_3.png", bbox_inches="tight")
     plt.show()
     # ====================================================================
