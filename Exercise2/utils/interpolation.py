@@ -26,9 +26,7 @@ class StandardLagrange(Interpolator):
     def fit(self):
         self.nodes = np.asarray(self.nodes).ravel()
         self.values = np.asarray(self.values).ravel()
-        assert self.nodes.ndim == 1 and self.values.ndim == 1, (
-            "nodes and values must be one-dimensional arrays"
-        )
+
         assert self.nodes.shape[0] == self.values.shape[0], (
             "nodes and values must have the same length"
         )
@@ -61,9 +59,7 @@ class FirstBarycentricLagrange(Interpolator):
     def fit(self):
         self.nodes = np.asarray(self.nodes).ravel()
         self.values = np.asarray(self.values).ravel()
-        assert self.nodes.ndim == 1 and self.values.ndim == 1, (
-            "nodes and values must be one-dimensional arrays"
-        )
+
         assert self.nodes.shape[0] == self.values.shape[0], (
             "nodes and values must have the same length"
         )

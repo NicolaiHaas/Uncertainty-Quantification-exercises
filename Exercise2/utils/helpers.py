@@ -26,7 +26,7 @@ def generate_grid(
         case 'uniform':
             grid = grid
         case 'chebyshev':
-            grid = (np.cos((np.arange(N)+0.5)*np.pi/N) +1) * (b-a)/2 + a
+            grid = ((np.cos((np.arange(N)+0.5)*np.pi/N) +1) * (b-a)/2 + a)[::-1]
     # ====================================================================
     return grid
 
@@ -49,8 +49,8 @@ def compute_errors(
     emp_mean = samples.mean()
     emp_var = samples.var(mean=emp_mean,ddof=1)
     
-    mean_error = np.abs(mean_ref-emp_mean)/mean_ref
-    var_error = np.abs(var_ref-emp_var)/var_ref
+    mean_error = np.abs(mean_ref-emp_mean/mean_ref)
+    var_error = np.abs(var_ref-emp_var/var_ref)
 
     # ====================================================================
     return mean_error, var_error
@@ -91,8 +91,8 @@ def simulate(
     init_cond: dict[str, float],
 ) -> npt.NDArray:
     # ====================================================================
-    assert omega_samples.ndim == 1, "Only one dimesional list of frequencies permitted"
-    assert t_grid.ndim == 1, "Only one dimensional time grid allowed for finding ODE solutions"
+    assert omega_samples.ndim == 1 , "Only one-dimesional list of frequencies permitted"
+    assert t_grid.ndim == 1, "Only one-dimensional time grid allowed for finding ODE solutions"
     
     c = model_kwargs.get('c',1.0)
     k = model_kwargs.get('k',1.0)
