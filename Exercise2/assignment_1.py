@@ -174,22 +174,29 @@ if __name__ == "__main__":
     # Plotting.
     # ====================================================================
     fig, axs = plt.subplots(2,2)
-    
+    pce_mean_plot_ls = []
+    pce_var_plot_ls = []
+    pce_time_plot_ls = []
     # Plot PCE errors/times with one graph per node count
     for i in range(len(N_ls)):
-        axs[0,0].plot(M_ls,mean_err_PCE[i], c=plt.colormaps['cool'](i/len(N_ls)))
-        axs[0,1].plot(M_ls,var_err_PCE[i], c=plt.colormaps['cool'](i/len(N_ls)))
-        axs[1,1].plot(M_ls,time_ls_PCE[i], c=plt.colormaps['cool'](i/len(N_ls)))
-    
+        mean_plt = axs[0,0].plot(M_ls,mean_err_PCE[i], c=plt.colormaps['cool'](i/len(N_ls)))
+        var_plt = axs[0,1].plot(M_ls,var_err_PCE[i], c=plt.colormaps['cool'](i/len(N_ls)))
+        time_plt = axs[1,1].plot(M_ls,time_ls_PCE[i], c=plt.colormaps['cool'](i/len(N_ls)))
+        pce_time_plot_ls.append(time_plt[0])
+        pce_var_plot_ls.append(var_plt[0])
+        pce_mean_plot_ls.append(mean_plt[0])
+
+
     # Plot Monte Carlo errors/times
-    axs[0,0].plot(M_ls,mean_err_MC,c='red')
-    axs[0,1].plot(M_ls,var_err_MC,c='red')
-    axs[1,0].plot(M_ls,time_ls_MC,c='red')
+    mc_mean_plt = axs[0,0].plot(M_ls,mean_err_MC,c='red')[0]
+    mc_var_plt = axs[0,1].plot(M_ls,var_err_MC,c='red')[0]
+    mc_time_plt = axs[1,0].plot(M_ls,time_ls_MC,c='red')[0]
 
     axs[0,0].set_title(r"Relative errors on $\mu$ estimates")
     axs[0,1].set_title(r"Relative errors on variance estimates")
     axs[1,0].set_title(r"Compute time Monte Carlo")
     axs[1,1].set_title(r"Compute time Lagrange Interpolation")
+    fig.suptitle("Comparison Lagrange Interpolation with n-nodes vs Monte Carlo")
 
     axs[0,0].set_xlabel(r"Number of samples [log]")
     axs[0,1].set_xlabel(r"Number of samples [log]")    
@@ -201,6 +208,10 @@ if __name__ == "__main__":
     axs[1,0].set_ylabel(r"Time [s]")
     axs[1,1].set_ylabel(r"Time [s]")
 
+    axs[0,0].legend(pce_mean_plot_ls+[mc_mean_plt] , [f"Nodes:{n}" for n in N_ls] + ["Monte Carlo"])
+    axs[0,1].legend(pce_var_plot_ls + [mc_var_plt], [f"Nodes:{n}" for n in N_ls] + ["Monte Carlo"])
+    axs[1,1].legend(pce_time_plot_ls,[f"Nodes n:{n}" for n in N_ls])
+
     axs[0,0].set_xscale("log")
     axs[0,1].set_xscale("log")
     
@@ -208,6 +219,8 @@ if __name__ == "__main__":
     axs[0,1].set_yscale("log")
 
     plt.tight_layout()
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
     plt.show()
     
     # ====================================================================

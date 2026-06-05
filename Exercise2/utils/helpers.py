@@ -49,8 +49,8 @@ def compute_errors(
     emp_mean = samples.mean()
     emp_var = samples.var(mean=emp_mean,ddof=1)
     
-    mean_error = np.abs(mean_ref-emp_mean/mean_ref)
-    var_error = np.abs(var_ref-emp_var/var_ref)
+    mean_error = np.abs((mean_ref-emp_mean)/mean_ref)
+    var_error = np.abs((var_ref-emp_var)/var_ref)
 
     # ====================================================================
     return mean_error, var_error
