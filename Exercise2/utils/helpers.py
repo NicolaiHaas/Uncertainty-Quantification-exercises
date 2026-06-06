@@ -81,6 +81,7 @@ def load_reference(filename: str) -> tuple[float, float]:
         model_kwargs: dict[str -> float] - Contains all the equations parameters except the mode of solving 
                                            and initial conditions see [oscillator.py] for details.
         init_cond: dict[str -> float]    - Contains the initial conditions.
+        progress: bool                   - Prints progress to stdout.
     Returns:
         sample_solutions: np.array       - Array (|omegas| x |t_grid|) that contains solutions for each omega.
 '''
@@ -89,6 +90,7 @@ def simulate(
     omega_samples: npt.NDArray,
     model_kwargs: dict[str, float],
     init_cond: dict[str, float],
+    progress: bool = False
 ) -> npt.NDArray:
     # ====================================================================
     assert omega_samples.ndim == 1 , "Only one-dimesional list of frequencies permitted"
@@ -106,10 +108,12 @@ def simulate(
 
     # list of discretized oscillators for every frequency omega
     t_grid_ls = []
-    for omega in omega_samples:
+    if progress: print("Starting simulation:\n Progress:")
+    for i,omega in enumerate(omega_samples):
+        if progress and i % 1000 == 0: print(f"  {i/len(omega_samples)*100:.2f}%",end="\r")
         osci = Oscillator(c,k,f,omega)
-        t_grid_ls.append(osci.discretize("euler",y0,y1,t_grid,atol,rtol))
-
+        t_grid_ls.append(osci.discretize("odeint",y0,y1,t_grid,atol,rtol))
+    if progress: print("Simulation done!")
     sample_solutions = np.asarray(t_grid_ls)
     # ====================================================================
     return sample_solutions

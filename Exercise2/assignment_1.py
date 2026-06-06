@@ -208,10 +208,6 @@ if __name__ == "__main__":
     axs[1,0].set_ylabel(r"Time [s]")
     axs[1,1].set_ylabel(r"Time [s]")
 
-    # axs[0,0].legend(pce_mean_plot_ls+[mc_mean_plt] , [f"Nodes:{n}" for n in N_ls] + ["Monte Carlo"])
-    # axs[0,1].legend(pce_var_plot_ls + [mc_var_plt], [f"Nodes:{n}" for n in N_ls] + ["Monte Carlo"])
-    # axs[1,1].legend(pce_time_plot_ls,[f"Nodes n:{n}" for n in N_ls])
-
     fig.legend(pce_mean_plot_ls+[mc_mean_plt] , [f"Nodes:{n}" for n in N_ls] + ["Monte Carlo"])
 
     axs[0,0].set_xscale("log")
