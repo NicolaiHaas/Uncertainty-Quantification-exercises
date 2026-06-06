@@ -134,7 +134,7 @@ if __name__ == "__main__":
     uni_map = plt.plot(n_ls,uniform_ls)[0]
     plt.xlabel("Number of MC smaples")
     plt.ylabel(r"$\|\mathbb{E}_{x \sim \rho}[\phi_i(x) \phi_j(x)] - \mathbb{1}\|_{Fro}$")
-    plt.title("Difference between Polynomial inner product matrix $\Phi_{ij}$ and Identity")
+    plt.title("Difference between polynomial inner product matrix $\Phi_{ij}$ and Identity")
     plt.xscale('log')
     plt.yscale('log')
     norm_map = plt.plot(n_ls,normal_ls)[0]
