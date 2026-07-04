@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # ====================================================================
     for N in N_ls:
         polys_N = cp.generate_expansion(N,omega_dist,normed=True)
-        nodes_N, weights_N = cp.generate_quadrature(N,omega_dist)
+        nodes_N, weights_N = cp.generate_quadrature(N,omega_dist, rule = "gaussian")
         
         # Make sure no weird formatting from generate expansion / ndim == 1 
         nodes_N = nodes_N.reshape(-1)
@@ -140,8 +140,8 @@ if __name__ == "__main__":
     man_mean_plot = axs[0].plot(N_ls,man_mean_errors, c = "yellow",ls=(0,(1,1)))[0]
     mc_mean_plot = axs[0].plot(N_ls,np.zeros_like(N_ls)+mc_mean_err,c="green")[0]
 
-    cp_var_plot = axs[1].plot(N_ls,cp_var_errors, c = "purple")[0]
-    man_var_plot = axs[1].plot(N_ls,man_var_errors, c = "yellow")[0]
+    cp_var_plot = axs[1].plot(N_ls,cp_var_errors, c = "purple", ls = "dashed")[0]
+    man_var_plot = axs[1].plot(N_ls,man_var_errors, c = "yellow", ls = (0,(1,1)))[0]
     mc_var_plot = axs[1].plot(N_ls,np.zeros_like(N_ls)+mc_var_err,c="green")[0]
     plt.setp(axs, yscale = 'log', xlabel = "Size of polynomial basis", ylabel = "Error")
     
