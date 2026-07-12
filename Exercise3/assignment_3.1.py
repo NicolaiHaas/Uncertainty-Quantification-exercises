@@ -89,13 +89,16 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
     # with different seed
-    rng = np.random.default_rng(9833)
-    single_wiener_ns = org_wiener.generate(1, rng)[0]
-    rng = np.random.default_rng(9833)
-    single_kl_ns = org_wiener.approximate_kl(1, M, rng,)[0]
+    rng = np.random.default_rng(seed)
+    single_wiener_ns = org_wiener.generate(3, rng)
+    rng = np.random.default_rng(seed)
+    single_kl_ns = org_wiener.approximate_kl(3, M, rng,)
 
-    plt.plot(t_grid, single_wiener_ns, label="Wiener")
-    plt.plot(t_grid, single_kl_ns, label="KL(1000)")
+    for i in range(3):
+        plt.plot(t_grid, single_wiener_ns[i], color = "green",
+                label="Wiener" if i == 0 else None)
+        plt.plot(t_grid, single_kl_ns[i], color = "purple",
+                label="KL(1000)" if i == 0 else None)
     plt.xlabel("t")
     plt.ylabel(r"$W$")
     plt.legend()
@@ -104,4 +107,6 @@ if __name__ == "__main__":
 
     # TODO: visualize first eigenvalues and eigenfunctions.
     # show first 5 for functions
-    plot_eigenpairs(org_wiener, 5, t_grid)
+    ep_plt = plot_eigenpairs(org_wiener, 5, t_grid)
+    plt.show()
+    

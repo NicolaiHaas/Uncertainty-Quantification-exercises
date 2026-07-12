@@ -37,7 +37,8 @@ class WienerProcess:
             steps = np.sqrt(dt) * rng.standard_normal(self.n_points - 1)
             w_paths_mat[i,1:] = np.cumsum(steps)
 
-        return w_paths_mat
+        # readd mu to all, same effect
+        return w_paths_mat + self.mu
 
     def approximate_kl(self, n_samples: int, M: int, rng: np.random.Generator):
         
@@ -47,7 +48,9 @@ class WienerProcess:
         W_paths_kl = np.zeros((n_samples, self.n_points))
 
         # draw for random coeffs
-        C_m = rng.standard_normal((n_samples, M))
+        # turns out this is not the same samples per M otherwise
+        # C_m = rng.standard_normal((n_samples, M))
+        C_m = np.column_stack([rng.standard_normal(n_samples) for m in range(M)])
         # do these outside loop instead
         # eigenvalues
         lambda_sqr = np.sqrt(self.kl_eigenvalues(M))
@@ -63,15 +66,16 @@ class WienerProcess:
             path =  np.sum(lambda_sqr * phis * C_m[i, :], axis=1)
             W_paths_kl[i,:] = path
 
-        return W_paths_kl
+        return W_paths_kl + self.mu
 
     def kl_eigenvalues(self, M: int):
 
         # TODO: compute the first M eigenvalues of the Wiener process.
         # 1 / ((m-0.5)^2 * pi^2)
         # vec of length
+        # changed to T^2 / ... for 3.2
         m = np.asarray(range(M)) + 1
-        lam = 1 / ((m - 0.5)**2 * np.pi**2) 
+        lam = self.T**2 / ((m - 0.5)**2 * np.pi**2) 
         return lam
 
     def kl_eigenfunctions(self, M: int):
@@ -81,15 +85,16 @@ class WienerProcess:
         # returns evaluations of the first M eigenfunctions for the provided
         # time points.
 
-        sq2 = np.sqrt(2.0)
+        sq2 = np.sqrt(2.0 / self.T)
         m = np.asarray(range(M)) + 1
 
         # sqrt(2) * sin(pi*t*(m-0.5))
+        # added the /T for 3.2
         def phi(t):
             # change dimenstions of t and m to get mat
             # other way around
             # t as cols, m as rows
-            return sq2 * np.sin(np.pi * t[:, np.newaxis] * (m - 0.5)[np.newaxis, :])
+            return sq2 * np.sin((np.pi * t[:, np.newaxis] * (m - 0.5)[np.newaxis, :]) / self.T)
         
         return phi
 
