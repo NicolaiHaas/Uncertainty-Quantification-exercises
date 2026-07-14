@@ -50,12 +50,18 @@ def monte_carlo_sobol(
         Variable names go along the notation of the paper
     """
     K = len(distribution)
-    n = n_samples // 2
+    n = n_samples
 
-    # K x n sample matrices
-    A_and_B = distribution.sample(2 * n, rule="sobol")
-    A = A_and_B[:, :n]
-    B = A_and_B[:, n:2 * n]
+    uniform_2K = cp.Iid(cp.Uniform(0, 1), 2 * K)
+    # (2K, N) as described in the paper
+    A_and_B_unit = uniform_2K.sample(n, rule="sobol")  # Shape: (2*K, N)
+    
+    # (K, N) each
+    A_unit = A_and_B_unit[:K, :]  
+    B_unit = A_and_B_unit[K:, :]
+
+    A = distribution.inv(A_unit)
+    B = distribution.inv(B_unit)
 
     f_A = [_evaluate_oscillator(A[:, j], t_grid, fixed_args)[:, -1] for j in range(n)]
     f_B = [_evaluate_oscillator(B[:, j], t_grid, fixed_args)[:, -1] for j in range(n)]
@@ -73,8 +79,8 @@ def monte_carlo_sobol(
         AB_i = A.copy()
         AB_i[i] = B[i]
         f_AB[i] = np.asarray([_evaluate_oscillator(AB_i[:, j], t_grid, fixed_args)[:, -1] for j in range(n)]).flatten()
-        S_T[i] = np.sum((f_A - f_AB[i]) ** 2).clip(min=1e-14) / (2 * n)  # Eq. 19
-        S[i] = np.sum(f_B * (f_AB[i] - f_A)).clip(min=1e-14) / n        # Eq. 16
+        S_T[i] = np.sum((f_A - f_AB[i]) ** 2) / (2 * n)  # Eq. 19
+        S[i] = np.sum(f_B * (f_AB[i] - f_A)) / n        # Eq. 16
 
     return S / var_Y, S_T / var_Y
 

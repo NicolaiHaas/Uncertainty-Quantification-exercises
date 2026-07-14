@@ -85,7 +85,7 @@ def plot_samples(samples, x_lims, y_lims, same_norm = True):
 if __name__ == "__main__":
 
     x_lims, y_lims = (0, 1), (0, 1)
-    x_mesh_size, y_mesh_size =150, 150
+    x_mesh_size, y_mesh_size =15, 15
     scale = 2
     mean = lambda x: np.zeros(x.shape[0]**2)+0.1
     seed = 42

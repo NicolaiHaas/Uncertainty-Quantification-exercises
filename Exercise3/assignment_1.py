@@ -103,7 +103,7 @@ if __name__ == "__main__":
     # TODO: set the parameters of the methods.
     quadrature_degrees = [3,4]
     pce_degrees = [3,4]
-    n_samples = 893
+    n_samples = 446
 
     # TODO: set the time domain
     T_max = 10
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     mc_tot_handle = axs[1].plot(mc_S_T, c = 'darkred', ls = 'dashed')
     plt.setp(
         axs,
-        yscale = 'log', 
+        #yscale = 'log', 
         xlabel = 'Parameter', ylabel='Sobol index', 
         xticks = range(5),xticklabels=[r"$c$",r"$k$",r"$f$",r"$y_0$",r"$y_1$"]
     )
