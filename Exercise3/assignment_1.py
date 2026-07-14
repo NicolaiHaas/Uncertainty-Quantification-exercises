@@ -103,7 +103,7 @@ if __name__ == "__main__":
     # TODO: set the parameters of the methods.
     quadrature_degrees = [3,4]
     pce_degrees = [3,4]
-    n_samples = 1024
+    n_samples = 893
 
     # TODO: set the time domain
     T_max = 10
@@ -165,11 +165,11 @@ if __name__ == "__main__":
 
     axs[0].legend(
         sing_handle + mc_sing_handle,
-        ["P=3, D=3","P=4,D=3","P=3,D=4","P=4,D=4","MC"]
+        ["K=3, N=3","K=4,N=3","K=3,N=4","K=4,N=4","MC"]
     )
     axs[1].legend(
         tot_handle + mc_tot_handle,
-        ["P=3, D=3","P=4,D=3","P=3,D=4","P=4,D=4","MC"]
+        ["K=3, N=3","K=4,N=3","K=3,N=4","K=4,N=4","MC"]
     )
     plt.show()
 
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     mc_time_tag = plt.plot([t_MC]*len(sparse_input_times))
 
     plt.xticks(range(4),["(3,3)","(4,3)","(3,4)","(4,4)"])
-    plt.xlabel("Configuration (P,D)")
+    plt.xlabel("Configuration (K,N)")
     plt.ylabel("Computation time")
     plt.legend(full_times_tag + sparse_time_tag + mc_time_tag,["Full Grid PCE","Sparse Grid PCE", "MC"])
     plt.show()

@@ -73,8 +73,8 @@ def monte_carlo_sobol(
         AB_i = A.copy()
         AB_i[i] = B[i]
         f_AB[i] = np.asarray([_evaluate_oscillator(AB_i[:, j], t_grid, fixed_args)[:, -1] for j in range(n)]).flatten()
-        S_T[i] = np.sum((f_A - f_AB[i]) ** 2) / (2 * n)  # Eq. 19
-        S[i] = np.sum(f_B * (f_AB[i] - f_A)) / n        # Eq. 16
+        S_T[i] = np.sum((f_A - f_AB[i]) ** 2).clip(min=1e-14) / (2 * n)  # Eq. 19
+        S[i] = np.sum(f_B * (f_AB[i] - f_A)).clip(min=1e-14) / n        # Eq. 16
 
     return S / var_Y, S_T / var_Y
 
